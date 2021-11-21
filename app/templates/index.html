@@ -1,0 +1,93 @@
+{% extends "bootstrap/base.html" %}
+{% block title %}InfoCol{% endblock %}
+{% block head %}
+    {{ super() }}
+    <style></style>
+{% endblock %}
+{% block body %}
+    {% block navbar %}
+    <div class="navbar navbar-inverse" role="navigation">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">InfoCol</a>
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li><a href="/">Home</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    {% endblock %}
+    {% block content %}
+        <div class="container">
+            <div class="page-header " >
+                <form method="post" class="center-block">
+                <div class="center-block" style="text-align:center">
+                {{ form.hidden_tag() }}
+                {{ form.name.label }}{{ form.name() }}
+                {{ form.submit() }}
+                </div>
+                </form>
+            </div>
+            <div>
+                {% if whois_info %}
+                  <table class="table table-bordered">
+                    <tr><th colspan="2">{{ name }}的Whois信息</th></tr>
+                    {% for item in whois_info %}
+                        {% if item!='详情' %}
+                        <tr><td style="width: 20%">{{ item }}</td><td style="width: 80%">{{ whois_info[item] }}</td></tr>
+                        {% else %}
+                        <tr>
+                            <td style="width: 20%">
+                            <a role="button" data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                               {{ item }}
+                            </a>
+                            </td>
+                            <td style="width: 80%">
+                                <div class="collapse" id="collapseExample">
+                                  <div class="well">
+                                    {{ whois_info[item] }}
+                                  </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                  </table>
+                {% endif %}
+                {% if ipinfos|length>0 %}
+                  <table class="table table-bordered">
+                      <tr><th>IP</th><th>国家/地区</th><th>省份</th><th>城市</th><th>机构</th><th>ISP</th><th>经纬度</th><th>来源</th></tr>
+                      {% for ipinfo in ipinfos %}
+                      <tr>
+                          <td>{{ ipinfo['ip'] }}</td>
+                          <td>{{ ipinfo['country'] }}</td>
+                          <td>{{ ipinfo['region'] }}</td>
+                          <td>{{ ipinfo['city'] }}</td>
+                          <td>{{ ipinfo['org'] }}</td>
+                          <td>{{ ipinfo['isp'] }}</td>
+                          <td>{{ ipinfo['loc'] }}</td>
+                          <td>
+                              {% if ipinfo['source']=='ipinfo.io' %}
+                                  <a href="http://ipinfo.io/{{ ipinfo['ip'] }}" target="_blank">{{ ipinfo['source'] }}</a>
+                              {% elif ipinfo['source']=='ip-api.com'%}
+                                  <a href="http://ip-api.com/json/{{ ipinfo['ip'] }}" target="_blank">{{ ipinfo['source'] }}</a>
+                              {% else %}
+                                  {{ ipinfo['source'] }}
+                              {% endif %}
+                          </td>
+                      </tr>
+                      {% endfor %}
+                  </table>
+                {% endif %}
+            </div>
+        </div>
+    {% endblock %}
+{% endblock %}
