@@ -7,8 +7,8 @@
 """
 from config import Config
 from app import create_app
-#FLASK_ENV=Config().flaskenv
-app = create_app('development')
+FLASK_ENV=Config().flaskenv
+app = create_app(FLASK_ENV)
 
 if __name__=='__main__':
     app.run()

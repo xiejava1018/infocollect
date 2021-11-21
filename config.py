@@ -16,7 +16,7 @@ if os.path.exists(env_path):
     load_dotenv(env_path)
 
 class Config:
-    geoLiteDBdir=os.path.join(basedir,'GeoLite2\GeoLite2-City.mmdb')
+    geoLiteDBdir=os.path.join(basedir,'GeoLite2','GeoLite2-City.mmdb')
     flaskenv = os.getenv('FLASK_ENV','development')
     SECRET_KEY=os.getenv('SECRET_KEY','123!@#')
     SQLALCHEMY_TRACK_MODIFICATIONS=os.getenv('SQLALCHEMY_TRACK_MODIFICATIONS')
