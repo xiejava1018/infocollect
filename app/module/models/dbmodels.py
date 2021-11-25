@@ -9,7 +9,7 @@ from app.exts import db
 
 class IPInfo(db.Model):
     __tablename__='ipinfo'
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True,autoincrement=True)
     ip=db.Column(db.String(128))
     country=db.Column(db.String(255))
     region=db.Column(db.String(255))
@@ -22,11 +22,14 @@ class IPInfo(db.Model):
     updatetime=db.Column(db.String(64))
 
     def __repr__(self):
-        return '<IPInfo %r>' % self.id
+        return '<IPInfo %r,updatetime:%s>' % (self.id,self.updatetime)
+        IPInfo.metadata.drop_all()
+        IPInfo.metadata.create_all()
+
 
 class WhoisInfo(db.Model):
     __tablename__ = 'whoisinfo'
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True,autoincrement=True)
     domain_name=db.Column(db.String(255))
     registrar = db.Column(db.String(255))
     registrar_email = db.Column(db.String(128))
@@ -42,4 +45,16 @@ class WhoisInfo(db.Model):
     updated_time= db.Column(db.String(64))
 
     def __repr__(self):
-        return '<IPInfo %r>' % self.id
+        return '<WhoisInfo %r>' % self.id
+
+class QueryLog(db.Model):
+    __tablename__ = 'querylog'
+    id = db.Column(db.Integer, primary_key=True,autoincrement=True)
+    querystr = db.Column(db.String(255))
+    query_count=db.Column(db.Integer,default=1)
+    query_time=db.Column(db.String(64))
+
+    def __repr__(self):
+        return '<QueryLog %r,query_time:%s>' % (self.id,self.query_time)
+        QueryLog.metadata.drop_all()
+        QueryLog.metadata.create_all()
