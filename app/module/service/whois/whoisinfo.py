@@ -9,7 +9,7 @@ import requests
 from bs4 import BeautifulSoup
 from app.exts import db
 
-from app.module.models.dbmodels import WhoisInfo
+from app.module.models.dbmodels import WhoisInfo,SubDomain
 
 headers = {
     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36'
@@ -76,6 +76,34 @@ def getwhoisinfobychinafu(domain):
         ret_result=result[0]
     return ret_result
 
+#
+#子域名查询
+#querytype=0 根据子域名查询,querytype=1或其他 根据IP查询
+def getsubdomain(source,querytype=0):
+    # 先从数据库里查询，如果查不到则调用接口获取
+    ret_result = getSubDomainFromDB(source)
+    result = {}
+    if querytype == 0:
+        subdomain_service_url = 'https://www.dnsgrep.cn/subdomain/{}'.format(source)
+    else:
+        subdomain_service_url = 'https://www.dnsgrep.cn/ip/{}'.format(source)
+    if len(ret_result) == 0:
+        try:
+            post_result = requests.get(subdomain_service_url,headers=headers)
+            if post_result.status_code == 200:
+                ret_str = post_result.content.decode('utf-8')
+                soup = BeautifulSoup(ret_str, 'lxml')
+                items_tr = soup.find(name='table', id='table').find_all(name='tr')
+                for item_tr in items_tr[1:]:
+                    td_items = item_tr.find_all(name='td')
+                    result={'subdomain':td_items[0].text.strip(),'parse':td_items[1].text.strip(),'type':td_items[2].text.strip(),'datetime':td_items[3].text.strip()}
+                    #写数据库
+                    addSubDomain2DB(result)
+                    ret_result.append(result)
+        except Exception as r:
+            print('未知错误 %s' % (r))
+    return ret_result
+
 def getWhoisInfoFromDB(domainname):
     whoisInfos=db.session.execute('select * from whoisinfo where domain_name="%s" and updated_time > DATE_SUB(CURDATE(), INTERVAL 1 WEEK)' % domainname).fetchall()
     whoisInfo_dics=[]
@@ -83,6 +111,27 @@ def getWhoisInfoFromDB(domainname):
         chinafuwhoisinfo_dic=chinafuwhoisinfo2dic(whoisInfo)
         whoisInfo_dics.append(chinafuwhoisinfo_dic)
     return whoisInfo_dics
+
+def getSubDomainFromDB(source):
+    subdomains=db.session.execute('select * from subdomain where source="%s" and updated_time > DATE_SUB(CURDATE(), INTERVAL 1 WEEK)' % source).fetchall()
+    return subdomains
+
+def delSubDomain2DB(source):
+    db.session.execute('delete from subdomain where source="%s" ' % source)
+    db.session.commit()
+
+def addSubDomain2DB(subdomain_dic):
+    subdomain=SubDomain()
+    subdomain.source=subdomain_dic['source']
+    subdomain.subdomain=subdomain_dic['subdomain']
+    subdomain.parse=subdomain_dic['parse']
+    subdomain.type=subdomain_dic['type']
+    subdomain.datetime=subdomain_dic['datetime']
+    db.session.add(subdomain)
+    db.session.commit()
+
+
+
 
 def chinafuwhoisinfo2dic(whoisinfo):
     chinafuwhoisinfo_dic={}
@@ -114,5 +163,5 @@ def addchinafuWhoisInfo2DB(chinafuWhoisInfo_dic):
 
 
 if __name__=='__main__':
-    ipinfo=getwhoisinfobychinafu('transfar.com')
+    ipinfo=getsubdomainbyip('47.98.84.224')
     print(ipinfo)

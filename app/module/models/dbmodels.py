@@ -58,3 +58,19 @@ class QueryLog(db.Model):
         return '<QueryLog %r,query_time:%s>' % (self.id,self.query_time)
         QueryLog.metadata.drop_all()
         QueryLog.metadata.create_all()
+
+
+class SubDomain(db.Model):
+    __tablename__ = 'subdomain'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    source = db.Column(db.String(255))
+    subdomain = db.Column(db.String(255))
+    parse = db.Column(db.String(255))
+    type = db.Column(db.String(32))
+    datetime = db.Column(db.String(32))
+    updatetime = db.Column(db.String(32))
+
+    def __repr__(self):
+        return '<SubDomain %r,query_time:%s>' % (self.id,self.updatetime)
+        SubDomain.metadata.drop_all()
+        SubDomain.metadata.create_all()
