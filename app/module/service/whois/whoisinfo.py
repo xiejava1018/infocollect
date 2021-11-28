@@ -82,7 +82,6 @@ def getwhoisinfobychinafu(domain):
 def getsubdomain(source,querytype=0):
     # 先从数据库里查询，如果查不到则调用接口获取
     ret_result = getSubDomainFromDB(source)
-    result = {}
     if querytype == 0:
         subdomain_service_url = 'https://www.dnsgrep.cn/subdomain/{}'.format(source)
     else:
@@ -96,7 +95,7 @@ def getsubdomain(source,querytype=0):
                 items_tr = soup.find(name='table', id='table').find_all(name='tr')
                 for item_tr in items_tr[1:]:
                     td_items = item_tr.find_all(name='td')
-                    result={'subdomain':td_items[0].text.strip(),'parse':td_items[1].text.strip(),'type':td_items[2].text.strip(),'datetime':td_items[3].text.strip()}
+                    result={'source':'source','subdomain':td_items[0].text.strip(),'parse':td_items[1].text.strip(),'type':td_items[2].text.strip(),'datetime':td_items[3].text.strip()}
                     #写数据库
                     addSubDomain2DB(result)
                     ret_result.append(result)
@@ -113,7 +112,7 @@ def getWhoisInfoFromDB(domainname):
     return whoisInfo_dics
 
 def getSubDomainFromDB(source):
-    subdomains=db.session.execute('select * from subdomain where source="%s" and updated_time > DATE_SUB(CURDATE(), INTERVAL 1 WEEK)' % source).fetchall()
+    subdomains=db.session.execute('select * from subdomain where source="%s" and updatetime > DATE_SUB(CURDATE(), INTERVAL 1 WEEK)' % source).fetchall()
     return subdomains
 
 def delSubDomain2DB(source):

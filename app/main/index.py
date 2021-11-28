@@ -9,7 +9,7 @@ from flask import render_template, flash, redirect, url_for, request, current_ap
 from app.main.Forms import InputForm
 from app.module.service.ipinfo.getip import checkip, getIPbyDomain
 from app.module.service.ipinfo.ipinfo import getipinfo
-from app.module.service.whois.whoisinfo import getwhoisinfobychinafu
+from app.module.service.whois.whoisinfo import getwhoisinfobychinafu,getsubdomain
 from app.module.service.querylog.querylog import getQueryLog,addQueryLog
 
 index_bp=Blueprint('index',__name__)
@@ -24,20 +24,31 @@ def index():
 def query_result():
     querystr = ''
     ipinfos = []
+    subdomains=[]
     whois_info = ''
     form = InputForm()
+    query_type=''
     if form.validate_on_submit():
         querystr = form.name.data
         if checkip(querystr):
+            query_type='ip'
             ipinfos = getipinfo(querystr)
+            if len(ipinfos)>0:
+                ipinfo=ipinfos[0]
+                ip=ipinfo['ip']
+                #IP反查
+                subdomains=getsubdomain(ip,querytype=1)
         else:
+            query_type='domain'
             whois_info = getwhoisinfo(querystr)
             whois_ip = getIPbyDomain(querystr)
             if checkip(whois_ip):
                 ipinfos = getipinfo(whois_ip)
+            if len(whois_info)>0:
+                subdomains = getsubdomain(querystr, querytype=0)
         addQueryLog(querystr)
         form.name.data = ''
-    return render_template('queryreslut.html',form=form, name=querystr, ipinfos=ipinfos, whois_info=whois_info)
+    return render_template('queryreslut.html',form=form, name=querystr, ipinfos=ipinfos, whois_info=whois_info,subdomains=subdomains,query_type=query_type)
 
 #@index_bp.route('/getwhois/<domain>')
 def getwhoisinfo(domain):

@@ -88,6 +88,19 @@
                       {% endfor %}
                   </table>
                 {% endif %}
+                {% if subdomains|length>0 %}
+                  <table class="table table-bordered">
+                      <tr><th>域名</th><th>解析</th><th>类型</th><th>快照时间</th></tr>
+                      {% for subdomain in subdomains %}
+                      <tr>
+                          <td>{{ subdomain.subdomain }}</td>
+                          <td>{{ subdomain.parse }}</td>
+                          <td>{{ subdomain.type }}</td>
+                          <td>{{ subdomain.datetime }}</td>
+                      </tr>
+                      {% endfor %}
+                  </table>
+                {% endif %}
             </div>
         </div>
     {% endblock %}
